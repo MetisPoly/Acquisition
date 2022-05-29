@@ -47,7 +47,7 @@ void setup() {
 
 void loop() {
   //Set reference timer
-  currentMicros = micros();
+  CURRENT_MICROS = micros();
   
   //Execution time of all of this is approximately 100micros
   //Reset all counters
@@ -55,7 +55,7 @@ void loop() {
   counterEncoder = 0;
 
   //Read all electrode signals
-  for(int i = 0; i < numberOfElectrodes; i++) {
+  for(int i = 0; i < NUMBER_OF_ELECTRODES; i++) {
     valueElectrode[i] = analogRead(electrodePin[i]);
   }
 
@@ -76,7 +76,7 @@ void loop() {
   //Decompose all values from electrodes
   for(int i = 0; i < sizeof(valuesToSend); i++) {
     //Decompose all values from electrodes
-    if(counterElectrode < numberOfElectrodes) {
+    if(counterElectrode < NUMBER_OF_ELECTRODES) {
       //We decompose valueElectrode in 2 : 
         //First value is for the MSB byte
         //Second value is for the LSB byte
@@ -88,7 +88,7 @@ void loop() {
     }
 
     //Decompose all values from encoders
-    else if(counterEncoder < numberOfEncoder) {
+    else if(counterEncoder < NUMBER_OF_ENCODERS) {
       //Meaning we are intaking encoder values
         //First value is for the MSB byte etc.
         //Last value is for the LSB byte
@@ -107,6 +107,6 @@ void loop() {
     Serial.send_now();
 
   //Wait for a certain interval of time
-  while(micros() < currentMicros + interval) {} //Wait [interval]us 
+  while(micros() < CURRENT_MICROS + WAIT_TIME_MICROS) {} //Wait [interval]us 
 }
 
