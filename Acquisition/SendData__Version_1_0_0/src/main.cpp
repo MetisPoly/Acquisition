@@ -1,8 +1,7 @@
 #include "sendData.h"
 // allo test !
 //TODO : Implement interrupts - Deuxieme essai de changements
-//Test Alexandre yesyes tout fonctionne
-
+//Test Alexandre
 /*
 void interrupt_Encod1() {
   char i;
