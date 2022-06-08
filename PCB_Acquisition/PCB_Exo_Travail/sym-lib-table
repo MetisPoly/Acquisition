@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name Essai2_encodeurs-rescue)(type Legacy)(uri ${KIPRJMOD}/Essai2_encodeurs-rescue.lib)(options "")(descr ""))
+)
