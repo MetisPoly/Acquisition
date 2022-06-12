@@ -3,6 +3,7 @@ import queue
 import timeit
 import matplotlib.pyplot as plt
 
+#Ceci est un test pour la démo 
 ######################## Only lines to modify are right here ############################
 ## Define variables
 # Please note that encoders need to be 4 as of this version - 31 mars 2022
