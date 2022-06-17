@@ -17,7 +17,7 @@ unsigned long CURRENT_MICROS;
 uint32_t WAIT_TIME_MICROS = 500;
 
 /* Values to change depending on tests to be made */
-const uint8_t NUMBER_OF_ELECTRODES = 2;
+const uint8_t NUMBER_OF_ELECTRODES = 8;
 const uint8_t NUMBER_OF_ENCODERS = 4;
 
 /* Total number of bytes to send over serial port */
@@ -50,7 +50,8 @@ Encoder encod3(ENCODER_3_RED, ENCODER_3_GREEN);
 Encoder encod4(ENCODER_4_RED, ENCODER_4_GREEN);
 
 /* Create arrays to contain values of electrodes and encoders*/
-uint32_t electrodePin[4] = {ELECTRODE_1, ELECTRODE_2, ELECTRODE_3, ELECTRODE_4};
+uint32_t electrodePin[8] = {ELECTRODE_1, ELECTRODE_2, ELECTRODE_3, ELECTRODE_4, 
+                            ELECTRODE_5, ELECTRODE_6, ELECTRODE_7, ELECTRODE_8};
 Encoder encoder[4] = {encod1, encod2, encod3, encod4};
 
 /* Count values to indicate when to stop sending data */

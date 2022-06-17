@@ -62,10 +62,10 @@ void setup()
     encoder[i].write(1600);
   }
   */
-  encod1.write(5000u);
-  encod2.write(5000u);
-  encod3.write(5000u);
-  encod4.write(5000u);
+  encod1.write(4500u);
+  encod2.write(4700u);
+  encod3.write(4900u);
+  encod4.write(5100u);
 }
 
 
@@ -127,9 +127,9 @@ void loop()
           Fourth value is for the MSB - 24 bit right shift  
       */
       valuesToSend[i] = static_cast<uint8_t>(valueEncoder[counterEncoder]);
-      valuesToSend[i + 1] = static_cast<uint8_t>(right_shift_32_bit(valueEncoder[counterElectrode], 8));
-      valuesToSend[i + 2] = static_cast<uint8_t>(right_shift_32_bit(valueEncoder[counterElectrode], 16));
-      valuesToSend[i + 3] = static_cast<uint8_t>(right_shift_32_bit(valueEncoder[counterElectrode], 24));
+      valuesToSend[i + 1] = static_cast<uint8_t>(right_shift_32_bit(valueEncoder[counterEncoder], 8));
+      valuesToSend[i + 2] = static_cast<uint8_t>(right_shift_32_bit(valueEncoder[counterEncoder], 16));
+      valuesToSend[i + 3] = static_cast<uint8_t>(right_shift_32_bit(valueEncoder[counterEncoder], 24));
   
       i = i + 3;
       counterEncoder++;

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 ######################## Only lines to modify are right here ############################
 ## Define variables
 # Please note that encoders need to be 4 as of this version - 31 mars 2022
-nbElectrodes = 2
+nbElectrodes = 8
 nbEncoders = 4
 #########################################################################################
 
@@ -78,7 +78,7 @@ except KeyboardInterrupt:
         for j in range(0, len(A)):
             A[j].append(values[i + j])
 
-    print(A)
+    #print(A)
 
     fig, axs = plt.subplots(nbElectrodes)
     fig.suptitle('Resultats obtenus Electrodes')
