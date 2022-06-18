@@ -13,18 +13,21 @@ def acquireData(nameThread, numberOfElectrodes, numberOfEncoders, stopEvent):
     #########################################################################################
     
     print("Thread has started.")
-    print(nbElectrodes)
-    print(nbEncoders)
+    print("Number of electrodes", nbElectrodes)
+    print("Number of encoders", nbEncoders)
     
     # Create list of lists to contain all individual values of data acquired
     bigList=[]
 
     for i in range(0,nbElectrodes):
         electrode=[]
-    bigList=[].append(electrode)
+        bigList.append(electrode)
+
     for i in range(0,nbEncoders):
         encodeur=[]
-    bigList=[].append(encodeur)
+        bigList.append(encodeur)
+
+    print("General list created")
     print(bigList)
 
 
@@ -32,14 +35,16 @@ def acquireData(nameThread, numberOfElectrodes, numberOfEncoders, stopEvent):
     # Put baud rate at 500k bits/s - 2 encoders and 1 electrode make up to 10 bytes per package
     portOpen = False
     while not portOpen:
+        print("No serial port found")
         try:
             # Make sure COM port is correct (see in Gestionnaire de périphériques)
-            arduino = serial.Serial(port='COM7', baudrate=1000000, timeout=None, xonxoff=False, rtscts=False,
+            arduino = serial.Serial(port='COM3', baudrate=1000000, timeout=None, xonxoff=False, rtscts=False,
                                     dsrdtr=False)
             # Clear the serial buffer (input and output)
             arduino.flushInput()
             arduino.flushOutput()
             portOpen = True
+            print("Found serial port")
         except:
             pass
 
