@@ -67,7 +67,7 @@ class AcquireWindow(Screen):
     numberOfEncodersInfo = ObjectProperty(None)
     acquisition = ObjectProperty(None)
     threadAcquisition = ObjectProperty(None)
-    threadGenerate = ObjectProperty(None)
+    #threadGenerate = ObjectProperty(None)
     stopThread = ObjectProperty(None)
     current = ""
 
@@ -87,7 +87,6 @@ class AcquireWindow(Screen):
 
         # Enable or disable buttons
         self.startAcquisition.disabled = False
-        self.generate.disabled = True
 
         # Create thread and create a threading event 
             # To stop the thread we will need a stopThread event
@@ -118,7 +117,6 @@ class AcquireWindow(Screen):
             # Update buttons
             self.startAcquisition.text = 'Start data acquisition'
             self.startAcquisition.disabled = True
-            self.generate.disabled = False
 
             # Set the flag to true and make the recording stop
             self.stopThread.set()
