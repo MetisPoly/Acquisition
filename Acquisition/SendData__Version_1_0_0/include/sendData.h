@@ -17,7 +17,7 @@ unsigned long CURRENT_MICROS;
 uint32_t WAIT_TIME_MICROS = 500;
 
 /* Values to change depending on tests to be made */
-const uint8_t NUMBER_OF_ELECTRODES = 2;
+const uint8_t NUMBER_OF_ELECTRODES = 8;
 const uint8_t NUMBER_OF_ENCODERS = 4;
 
 /* Total number of bytes to send over serial port */

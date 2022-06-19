@@ -46,7 +46,7 @@ class InfoWindow(Screen):
     # Click on save button
     # All info is sent in a .txt file to be read afterwards by acquiring thread
     def saveSelf(self):
-        with open('C:/Users/Thomas/OneDrive/Desktop/GUI_Acquisition_txt_file/' + self.filename.text + '.txt', 'w') as f:
+        with open('C:/Users/truiz/OneDrive/Desktop/GUI_Acquisition_txt_file/' + self.filename.text + '.txt', 'w') as f:
             f.write(self.filename.text)
             f.write('\n')
             f.write(self.numberOfElectrodes.text)
@@ -74,7 +74,7 @@ class AcquireWindow(Screen):
     # Defines what happens when a load is required upon entering the Acquire window
     def loadSelf(self):
         # The .txt file created when the submit button is clicked is used here
-        with open('C:/Users/Thomas/OneDrive/Desktop/GUI_Acquisition_txt_file/' + self.current + '.txt', 'r') as f:
+        with open('C:/Users/truiz/OneDrive/Desktop/GUI_Acquisition_txt_file/' + self.current + '.txt', 'r') as f:
             lines = f.readlines()
         self.fileName.text                  = "File name is " + lines[0].rstrip() + " .npy"
         self.numberOfElectrodesInfo.text    = "There are " + lines[1].rstrip() + " electrodes"
@@ -89,7 +89,7 @@ class AcquireWindow(Screen):
         # Name of thread has to be random if the program is meant to run multiple times in a row
         stopThread = Event()  # Set flag is false by default - will stop the acquiring thread
         nameThreadAcquire = random.get_name() 
-        nameThreadAcquire = Thread(target=main.acquireData, args=(self.current, int(lines[1].rstrip()), int(lines[2].rstrip()), stopThread))
+        nameThreadAcquire = Thread(target=main.acquireData, args=(self.current, lines[0].rstrip(), int(lines[1].rstrip()), int(lines[2].rstrip()), stopThread))
 
         # Assign the objects to their objects in the window objects
         self.threadAcquire = nameThreadAcquire
@@ -97,7 +97,7 @@ class AcquireWindow(Screen):
 
 
     def startAcquire(self):
-        # If we want to start a recording
+        # If we want to start data acquisition
         if(self.startAcquisition.text == 'Start data acquisition'):
             # Update buttons
             self.startAcquisition.text = 'Stop data acquisition'
@@ -107,10 +107,10 @@ class AcquireWindow(Screen):
             # Start the thread (call function main.acquireData)
             self.threadAcquire.start()
 
-        # If we want to stop a current recording
-        elif(self.startAcquisition.text == 'Stop recording'):
+        # If we want to stop a data acquisition
+        elif(self.startAcquisition.text == 'Stop data acquisition'):
             # Update buttons
-            self.startAcquisition.text = 'Start recording'
+            self.startAcquisition.text = 'Start data acquisition'
             self.startAcquisition.disabled = True
             self.generate.disabled = False
 
