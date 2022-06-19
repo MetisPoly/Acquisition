@@ -8,12 +8,14 @@ from threading import Event
 from threading import Thread
 from kivy.core.window import Window
 import randomname as random
+import main # Import main.py in the same directory
 
-import main
 
-# This class defines the content of the Info window
-# It contains all user input boxes, the possibility to reset and submit information
+###################################################################
+# This class defines the content of the Info window - it contains all user input boxes, the possibility to reset and submit information
+###################################################################
 class InfoWindow(Screen):
+    # Define objects used throughout the window
     numberOfElectrodes = ObjectProperty(None)
     numberOfEncoders = ObjectProperty(None)
     filename = ObjectProperty(None)
@@ -23,12 +25,13 @@ class InfoWindow(Screen):
         if int(self.numberOfElectrodes.text) > 0 and int(self.numberOfElectrodes.text) < 9:
             if int(self.numberOfEncoders.text) > 0 and int(self.numberOfEncoders.text) < 5:
                 if self.filename.text != "":
-                    # Initiate the current name of AcquireWindow to be the filename
+                    # Set the current object of the Acquire window to be the filename
                     AcquireWindow.current = self.filename.text
                     # Save the information entered in a .txt file
                     self.saveSelf()
                     # Reset information in Info Window
                     self.reset()
+                    # Change screens
                     sm.current = "acquisition"
                 else:
                     return invalidFilename()
@@ -54,8 +57,11 @@ class InfoWindow(Screen):
             f.write(self.numberOfEncoders.text)
 
 
+###################################################################
 # This class contains everything related to the data acquisition
+###################################################################
 class AcquireWindow(Screen):
+    # Define objects used throughout the window
     fileName = ObjectProperty(None)
     numberOfElectrodesInfo = ObjectProperty(None)
     numberOfEncodersInfo = ObjectProperty(None)
@@ -65,8 +71,7 @@ class AcquireWindow(Screen):
     stopThread = ObjectProperty(None)
     current = ""
 
-    # Defines what happens when we enter the Acquire window
-    # It loads the user defined information from previous window
+    # Defines what happens when we enter the Acquire window - loads the user defined information from previous window
     def on_enter(self):
         self.loadSelf()
 
@@ -85,17 +90,18 @@ class AcquireWindow(Screen):
         self.generate.disabled = True
 
         # Create thread and create a threading event 
-        # To stop the thread we will need a stopThread event
-        # Name of thread has to be random if the program is meant to run multiple times in a row
+            # To stop the thread we will need a stopThread event
+            # Name of thread has to be random if the program is meant to run multiple times in a row
         stopThread = Event()  # Set flag is false by default - will stop the acquiring thread
         nameThreadAcquire = random.get_name() 
-        nameThreadAcquire = Thread(target=main.acquireData, args=(self.current, lines[0].rstrip(), int(lines[1].rstrip()), int(lines[2].rstrip()), stopThread))
+        nameThreadAcquire = Thread(target=main.acquireData, args=(lines[0].rstrip(), int(lines[1].rstrip()), int(lines[2].rstrip()), stopThread))
 
         # Assign the objects to their objects in the window objects
         self.threadAcquire = nameThreadAcquire
         self.stopThread = stopThread
 
 
+    # Defines what happens when we press the start/stop acquisition button 
     def startAcquire(self):
         # If we want to start data acquisition
         if(self.startAcquisition.text == 'Start data acquisition'):
@@ -118,20 +124,16 @@ class AcquireWindow(Screen):
             self.stopThread.set()
 
 
-    def generatePartition(self):
-        # Call the setup function in main.py with the name of the file to be generated
-        main.setup(self.current)
-
-        self.startRecording.disabled = False
-        #self.threadGenerate.join()
-        # Reset the scree to the information window to start a new score
-        sm.current = "info"
-
-
+###################################################################
+# Indicate to screen manager that all is good - Still don't know why this needs to be before main
+###################################################################
 class WindowManager(ScreenManager):
     pass
 
 
+###################################################################
+# Define error messages
+###################################################################
 def invalidNumberOfEncoders():
     pop = Popup(title='Invalid Number Of Encoders',
                   content=Label(text='Invalid number of encoders. Please insert value between 1 and 4.'),
@@ -161,22 +163,23 @@ def invalidForm():
     pop.open()
 
 
+###################################################################
+# Main build for application
+###################################################################
 kv = Builder.load_file("GUI_Acquisition.kv")
-
 
 class MyMainApp(App):
     def build(self):
         return sm
 
-
 if __name__ == "__main__":
     sm = WindowManager()
+    # Screen names are defined here
     screens = [InfoWindow(name="info"), AcquireWindow(name="acquisition")]
     for screen in screens:
         sm.add_widget(screen)
 
+    # Initial screen is indicated here
     sm.current = "info"
-
-    #Window.fullscreen = 'auto'
 
     MyMainApp().run()

@@ -4,43 +4,56 @@ import timeit
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-def acquireData(nameThread, filename, numberOfElectrodes, numberOfEncoders, stopEvent):
-    ######################## Only lines to modify are right here ############################
-    ## Define variables
-    # Please note that encoders need to be 4 as of this version - 31 mars 2022
-    nbElectrodes = numberOfElectrodes
-    nbEncoders = numberOfEncoders
-    #########################################################################################
-    
+###################################################################
+# This function is called when the user wants to start data acquisition
+# We use this function as a initializer to make sure everything is correctly set to collect data
+# @params: filename - Name of the .npy file the user wants to generate
+#          numberOfElectrodes - Number of electrodes collecting data
+#          numberOfEncoders - Number of encoders collecting data
+#          stopEvent - Event to indicate to stop collecting data
+###################################################################
+def acquireData(filename, numberOfElectrodes, numberOfEncoders, stopEvent):
+    # Generic sanity print 
     print("Thread has started.")
-    print("Number of electrodes", nbElectrodes)
-    print("Number of encoders", nbEncoders)
+    print("Number of electrodes: ", numberOfElectrodes)
+    print("Number of encoders: ", numberOfEncoders)
     
-    # Create list of lists to contain all individual values of data acquired
-    bigList=[]
+    # Create a general list to contain all the lists of values of data collected
+    generalList=[]
 
     # Create 8 lists for the maximal 8 electrodes
-    # Some lists will be empty if less than 8 electrodes are specified
+        # Some lists will be empty if less than 8 electrodes are specified
     for i in range(0, 8):
         electrode=[]
-        bigList.append(electrode)
+        generalList.append(electrode)
 
     # Create 4 lists for the maximal 4 encoders
-    # Some lists will be empty if less than 4 encoders are specified
+        # Some lists will be empty if less than 4 encoders are specified
     for i in range(0, 4):
         encodeur=[]
-        bigList.append(encodeur)
+        generalList.append(encodeur)
 
-    print("General list created")
-    print(bigList)
+    # Sanity print - checks if generalList was created correctly
+    print("General list created.")
+    print(generalList)
+
+    # Call the collectData function to start collecting data
+    collectData(filename, generalList, numberOfElectrodes, numberOfEncoders, stopEvent)
 
 
+###################################################################
+# This function is called after a general list has been correctly initialized
+# @params: filename - Name of the .npy file the user wants to generate
+#          generalList - List of lists to contain collected data
+#          numberOfElectrodes - Number of electrodes collecting data
+#          numberOfEncoders - Number of encoders collecting data
+#          stopEvent - Event to indicate to stop collecting data
+###################################################################
+def collectData(filename, generalList, numberOfElectrodes, numberOfEncoders, stopEvent):
     # Check if serial port is open
-    # Put baud rate at 500k bits/s - 2 encoders and 1 electrode make up to 10 bytes per package
+        # Sets the parameters if not open
     portOpen = False
     while not portOpen:
-        print("No serial port found")
         try:
             # Make sure COM port is correct (see in Gestionnaire de périphériques)
             arduino = serial.Serial(port='COM7', baudrate=1000000, timeout=None, xonxoff=False, rtscts=False,
@@ -53,75 +66,80 @@ def acquireData(nameThread, filename, numberOfElectrodes, numberOfEncoders, stop
         except:
             pass
 
-    # Create queue to hold in all the values sent over by the TeensyLC
-    que1 = queue.Queue()
+    # Create a queue to hold in all the bytes sent over the serial port
+    que = queue.Queue()
     print('Queue created, starting acquisition')
 
-    # Get the data and insert it in que1
+    # Start a timer to determine amount of time passed between beggining and end of acquisition
     start = timeit.default_timer()
-    while not stopEvent.is_set(): #While the event flag is false
-        #Get the number of bytes in the input buffer of the serial port
+
+    while not stopEvent.is_set(): # While the event flag to stop the thread is false
+        # Get the number of bytes in the input buffer of the serial port
         bytesToRead = arduino.in_waiting
         if bytesToRead != 0:
             # Read the number of bytes in the input buffer
             data = arduino.read(bytesToRead)
+            # Insert the bytes read in the que
             for i in range(len(data)):
-                que1.put(data[i])
+                que.put(data[i])
+
     else: # Flag is set to true - user wants to stop the data acquisition
-        stopAcquisition(nameThread, filename, start, que1, nbElectrodes, nbEncoders, bigList)
+        stopAcquisition(filename, generalList, numberOfElectrodes, numberOfEncoders, start, que)
 
 
-def stopAcquisition(name, filename, timerStart, data_queue, numberOfElectrodes, numberOfEncoders, bigList):
+###################################################################
+# This function is called after user has indicated it wants to stop the data acquisition
+# @params: filename - Name of the .npy file the user wants to generate
+#          generalList - List of lists to contain collected data
+#          numberOfElectrodes - Number of electrodes collecting data
+#          numberOfEncoders - Number of encoders collecting data
+#          start - Timer indication of when data acquisition began
+#          que - The queue where all the bytes are stored
+###################################################################
+def stopAcquisition(filename, generalList, numberOfElectrodes, numberOfEncoders, timerStart, que):
+    # Stop timer recording the acquisition time
     stop = timeit.default_timer()
     print(stop - timerStart)
-    print(data_queue.qsize() / (numberOfElectrodes*2 + numberOfEncoders*4)) # Nb of packs of data sent
 
-    #Retrieve data
-    listData = list(data_queue.queue)
+    # Print the number of packs (of 32 bytes) of data sent 
+    print(que.qsize() / (numberOfElectrodes*2 + numberOfEncoders*4))
+
+    # Transform the queue into a list to simplify data recomposition
+    listData = list(que.queue)
+
+    # Create list to contain all recomposed values
     values = []
+    
     counter = 0
+    # Loops to recompose values
     for i in range(0, int(len(listData) / (numberOfElectrodes*2 + numberOfEncoders*4))):
+        # First loop recomposes electrode values
+            # Append two bytes and left shift the second one (as it is the MSB)
+            # Do this for the specified number of electrodes
         for j in range(numberOfElectrodes):
             values.append(listData[counter] + (listData[counter + 1] << 8))
+            # Counter is incremented of 2 as every electrode value is 2 bytes
             counter += 2
 
+        # Second loop recomposes encoders values
+            # Append two bytes and left shift the second, third and fourth bytes
+            # Do this for the specified number of encoders
         for k in range(numberOfEncoders):
             values.append((listData[counter]) + (listData[counter + 1] << 8) + (listData[counter + 2] << 16) + (
                             listData[counter + 3] << 24))
+            # Counter is incremented of 4 as every encoder value is 4 bytes
             counter += 4
 
     # Plot all values obtained
-    for i in range(0, len(values) - (len(bigList)-1), len(bigList)):
-        for j in range(0, len(bigList)):
-            bigList[j].append(values[i + j])
-
-    # Transfer all lists into .npy file
-    electrode1 = np.array(bigList[0])
-    electrode2 = np.array(bigList[1])
-    electrode3 = np.array(bigList[2])
-    electrode4 = np.array(bigList[3])
-    electrode5 = np.array(bigList[4])
-    electrode6 = np.array(bigList[5])
-    electrode7 = np.array(bigList[6])
-    electrode8 = np.array(bigList[7])
-
-    encoder1 = np.array(bigList[8])
-    encoder2 = np.array(bigList[8])
-    encoder3 = np.array(bigList[8])
-    encoder4 = np.array(bigList[8])
-
-    np.savez('C:/Users/truiz/OneDrive/Desktop/GUI_Acquisition_txt_file/' + filename, 
-                electrode1=electrode1, electrode2=electrode2, electrode3=electrode3, electrode4=electrode4,
-                electrode5=electrode5, electrode6=electrode6, electrode7=electrode7, electrode8=electrode8,
-                encoder1=encoder1, encoder2=encoder2, encoder3=encoder3, encoder4=encoder4)
-
-
+    for i in range(0, len(values) - (len(generalList)-1), len(generalList)):
+        for j in range(0, len(generalList)):
+            generalList[j].append(values[i + j])
 
     fig, axs = plt.subplots(numberOfElectrodes)
     fig.suptitle('Resultats obtenus Electrodes')
     numeroElectrode = 0
     for i in range(0, numberOfElectrodes):
-        axs[numeroElectrode].plot(bigList[i])
+        axs[numeroElectrode].plot(generalList[i])
         axs[numeroElectrode].set_title(f'Electrode {numeroElectrode}')
         numeroElectrode+=1
     #plt.show()
@@ -129,10 +147,35 @@ def stopAcquisition(name, filename, timerStart, data_queue, numberOfElectrodes, 
     fig, axs = plt.subplots(numberOfEncoders)
     fig.suptitle('Resultats obtenus Encodeurs')
     numeroEncodeur = 0
-    for i in range(numberOfElectrodes, len(bigList)):
-        axs[numeroEncodeur].plot(bigList[i])
+    for i in range(numberOfElectrodes, len(generalList)):
+        axs[numeroEncodeur].plot(generalList[i])
         axs[numeroEncodeur].set_title(f'Encodeur {numeroEncodeur}')
         numeroEncodeur += 1
     #plt.show()
-
     print('Acquisition done')
+
+    # Call the generateNpyFile function 
+    generateNpyFile(filename, generalList)
+
+
+
+def generateNpyFile(filename, listOfValues):
+    # Transfer all lists into .npy file
+    electrode1 = np.array(listOfValues[0])
+    electrode2 = np.array(listOfValues[1])
+    electrode3 = np.array(listOfValues[2])
+    electrode4 = np.array(listOfValues[3])
+    electrode5 = np.array(listOfValues[4])
+    electrode6 = np.array(listOfValues[5])
+    electrode7 = np.array(listOfValues[6])
+    electrode8 = np.array(listOfValues[7])
+
+    encoder1 = np.array(listOfValues[8])
+    encoder2 = np.array(listOfValues[9])
+    encoder3 = np.array(listOfValues[10])
+    encoder4 = np.array(listOfValues[11])
+
+    np.savez('C:/Users/truiz/OneDrive/Desktop/GUI_Acquisition_txt_file/' + filename, 
+                electrode1=electrode1, electrode2=electrode2, electrode3=electrode3, electrode4=electrode4,
+                electrode5=electrode5, electrode6=electrode6, electrode7=electrode7, electrode8=electrode8,
+                encoder1=encoder1, encoder2=encoder2, encoder3=encoder3, encoder4=encoder4)
