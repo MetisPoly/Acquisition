@@ -62,6 +62,7 @@ void setup()
     encoder[i].write(1600);
   }
   */
+  
   encod1.write(4000u);
   encod2.write(3000u);
   encod3.write(2000u);
