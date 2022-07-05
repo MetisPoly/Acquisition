@@ -68,6 +68,7 @@
     fileName : fileName
     changeInfo : changeInfo
     startAcquisition : startAcquisition
+    plotNpzData : plotNpzData
 
     FloatLayout:
         Label:
@@ -104,3 +105,11 @@
             text: 'Start data acquisition'
             on_release:
                 root.startAcquire()
+        
+        Button:
+            id: plotNpzData
+            pos_hint:{"x": 0.6, "y": 0.2}
+            size_hint: 0.3,0.2
+            text: 'Plot the acquired data'
+            on_release:
+                root.plotData()

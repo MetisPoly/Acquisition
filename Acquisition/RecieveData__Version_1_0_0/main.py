@@ -1,3 +1,4 @@
+from json import encoder
 import serial
 import queue
 import timeit
@@ -56,7 +57,7 @@ def collectData(filename, generalList, numberOfElectrodes, numberOfEncoders, sto
     while not portOpen:
         try:
             # Make sure COM port is correct (see in Gestionnaire de périphériques)
-            arduino = serial.Serial(port='COM7', baudrate=1000000, timeout=None, xonxoff=False, rtscts=False,
+            arduino = serial.Serial(port='COM4', baudrate=1000000, timeout=None, xonxoff=False, rtscts=False,
                                     dsrdtr=False)
             # Clear the serial buffer (input and output)
             arduino.flushInput()
@@ -134,29 +135,10 @@ def stopAcquisition(filename, generalList, numberOfElectrodes, numberOfEncoders,
     for i in range(0, len(values) - (len(generalList)-1), len(generalList)):
         for j in range(0, len(generalList)):
             generalList[j].append(values[i + j])
-
-    fig, axs = plt.subplots(numberOfElectrodes)
-    fig.suptitle('Resultats obtenus Electrodes')
-    numeroElectrode = 0
-    for i in range(0, numberOfElectrodes):
-        axs[numeroElectrode].plot(generalList[i])
-        axs[numeroElectrode].set_title(f'Electrode {numeroElectrode}')
-        numeroElectrode+=1
-    #plt.show()
-
-    fig, axs = plt.subplots(numberOfEncoders)
-    fig.suptitle('Resultats obtenus Encodeurs')
-    numeroEncodeur = 0
-    for i in range(numberOfElectrodes, len(generalList)):
-        axs[numeroEncodeur].plot(generalList[i])
-        axs[numeroEncodeur].set_title(f'Encodeur {numeroEncodeur}')
-        numeroEncodeur += 1
-    #plt.show()
     print('Acquisition done')
 
     # Call the generateNpyFile function 
     generateNpyFile(filename, generalList)
-
 
 
 def generateNpyFile(filename, listOfValues):
@@ -179,3 +161,59 @@ def generateNpyFile(filename, listOfValues):
                 electrode1=electrode1, electrode2=electrode2, electrode3=electrode3, electrode4=electrode4,
                 electrode5=electrode5, electrode6=electrode6, electrode7=electrode7, electrode8=electrode8,
                 encoder1=encoder1, encoder2=encoder2, encoder3=encoder3, encoder4=encoder4)
+
+
+# Plots data coming from an npz
+def plotDataNpz(nameOfNpzFile):
+    generalPlotList = []
+    # Create 8 lists for the maximal 8 electrodes
+        # Some lists will be empty if less than 8 electrodes are specified
+    for i in range(0, 8):
+        electrode=[]
+        generalPlotList.append(electrode)
+
+    # Create 4 lists for the maximal 4 encoders
+        # Some lists will be empty if less than 4 encoders are specified
+    for i in range(0, 4):
+        encoder=[]
+        generalPlotList.append(encoder)
+
+    # Load all the npy files contained in the npz
+    dataNpz = np.load('C:/Users/truiz/OneDrive/Desktop/GUI_Acquisition_txt_file/' + nameOfNpzFile + '.npz')
+    
+    # Store all the data from the npy files
+    dataElectrode = []
+    generalPlotList[0] = dataNpz['electrode1']
+    generalPlotList[1] = dataNpz['electrode2']
+    generalPlotList[2] = dataNpz['electrode3']
+    generalPlotList[3] = dataNpz['electrode4']
+    generalPlotList[4] = dataNpz['electrode5']
+    generalPlotList[5] = dataNpz['electrode6']
+    generalPlotList[6] = dataNpz['electrode7']
+    generalPlotList[7] = dataNpz['electrode8']
+
+    dataEncoder = []
+    generalPlotList[8] = dataNpz['encoder1']
+    generalPlotList[9] = dataNpz['encoder2']
+    generalPlotList[10] = dataNpz['encoder3']
+    generalPlotList[11] = dataNpz['encoder4']
+
+    # There are 8 electrodes max
+    fig, axs = plt.subplots(8)
+    fig.suptitle('Resultats obtenus Electrodes')
+    numeroElectrode = 0
+    for i in range(0, 8):
+        axs[numeroElectrode].plot(generalPlotList[i])
+        axs[numeroElectrode].set_title(f'Electrode {numeroElectrode}')
+        numeroElectrode+=1
+    plt.show()
+    
+    # There are 4 encoders max
+    fig, axs = plt.subplots(4)
+    fig.suptitle('Resultats obtenus Encodeurs')
+    numeroEncodeur = 0
+    for i in range(8, 12):
+        axs[numeroEncodeur].plot(generalPlotList[i])
+        axs[numeroEncodeur].set_title(f'Encodeur {numeroEncodeur}')
+        numeroEncodeur += 1
+    plt.show()

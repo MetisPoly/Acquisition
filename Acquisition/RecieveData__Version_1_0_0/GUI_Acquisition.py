@@ -120,6 +120,11 @@ class AcquireWindow(Screen):
 
             # Set the flag to true and make the recording stop
             self.stopThread.set()
+    
+    # Defines what happens when we press the plot data button
+    def plotData(self):
+        main.plotDataNpz(self.current)
+
 
 
 ###################################################################

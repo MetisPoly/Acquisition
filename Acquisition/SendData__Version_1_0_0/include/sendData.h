@@ -55,8 +55,8 @@ uint32_t electrodePin[8] = {ELECTRODE_1, ELECTRODE_2, ELECTRODE_3, ELECTRODE_4,
 Encoder encoder[4] = {encod1, encod2, encod3, encod4};
 
 /* Count values to indicate when to stop sending data */
-byte counterElectrode = 0;
-byte counterEncoder = 0;
+uint8_t counterElectrode = 0;
+uint8_t counterEncoder = 0;
 
 /* 
 Arrays to send on serial port torwards .py program 
