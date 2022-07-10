@@ -62,10 +62,10 @@ void setup()
     encoder[i].write(1600);
   }
   */
-  encod1.write(4500u);
-  encod2.write(4700u);
-  encod3.write(4900u);
-  encod4.write(5100u);
+  encod1.write(5000u);
+  encod2.write(5000u);
+  encod3.write(5000u);
+  encod4.write(5000u);
 }
 
 

@@ -1,0 +1,4 @@
+Kivy==2.1.0
+matplotlib==3.5.2
+pyserial==3.5
+randomname==0.1.5
