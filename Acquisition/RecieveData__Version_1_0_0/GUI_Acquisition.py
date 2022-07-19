@@ -8,7 +8,12 @@ from threading import Event
 from threading import Thread
 from kivy.core.window import Window
 import randomname as random
+import os
 import main # Import main.py in the same directory
+
+# Get relative path
+ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+
 
 
 ###################################################################
@@ -49,7 +54,7 @@ class InfoWindow(Screen):
     # Click on save button
     # All info is sent in a .txt file to be read afterwards by acquiring thread
     def saveSelf(self):
-        with open('C:/Users/truiz/OneDrive/Desktop/GUI_Acquisition_txt_file/' + self.filename.text + '.txt', 'w') as f:
+        with open(ROOT_DIR + '/RecieveData__Version_1_0_0/' + self.filename.text + '.txt', 'w') as f:
             f.write(self.filename.text)
             f.write('\n')
             f.write(self.numberOfElectrodes.text)
@@ -79,7 +84,7 @@ class AcquireWindow(Screen):
     # Defines what happens when a load is required upon entering the Acquire window
     def loadSelf(self):
         # The .txt file created when the submit button is clicked is used here
-        with open('C:/Users/truiz/OneDrive/Desktop/GUI_Acquisition_txt_file/' + self.current + '.txt', 'r') as f:
+        with open(ROOT_DIR + '/RecieveData__Version_1_0_0/' + self.current + '.txt', 'r') as f:
             lines = f.readlines()
         self.fileName.text                  = "File name is " + lines[0].rstrip() + " .npy"
         self.numberOfElectrodesInfo.text    = "There are " + lines[1].rstrip() + " electrodes"
